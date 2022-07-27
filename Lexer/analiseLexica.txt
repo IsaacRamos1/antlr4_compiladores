@@ -1,0 +1,13 @@
+--------------------------------------
+Token           Tipo    
+--------------------------------------
+range           PR      
+i               ID      
+in              PR      
+range           PR      
+(               SIMBOLO 
+1               NUMERO  
+,               SIMBOLO 
+10              NUMERO  
+)               SIMBOLO 
+:               SIMBOLO 
