@@ -23,13 +23,12 @@ def analise():
     list_tokens = lexer.getAllTokens()     # vamos receber a lista de tokens
 
     file = open('lexica.txt', 'w+')
-    file.write("============================\n")            # abrir ou criar um arquivo txt
-    file.write("{:<15} {:<8}\n".format('Token', 'Type'))
-    file.write("============================\n")
+    file.write("==============================================\n")            # abrir ou criar um arquivo txt
+    file.write("{:<18} {:<10}\n".format('Token', 'Type'))
 
     for token in list_tokens:
         nomeEtoken = expr2022.symbolicNames[token.type]             # get nome e token
-        file.write("\n{:15} {:<8}".format(token.text, nomeEtoken))  # escrever no .txt
+        file.write("\n{:18} {:<10}".format(token.text, nomeEtoken))  # escrever no .txt
 
     out.insert('1.0', '\n\n---- AntLR com Python: -----\nAlunos:\nIsaac Silva Santos Ramos\nPedro Gonçalves Neto')
 
@@ -50,8 +49,10 @@ if __name__ == '__main__':
     editorText.pack(fill=X)
 
     out = Text(height=window.winfo_reqheight())
-    out.config(bg='#333333', fg='#249903')          # área de saída
+    out.config(bg='#212020', fg='#249903')          # área de saída
     out.pack(fill=X)
+
+    out.insert('1.0', '\n\n---- AntLR com Python: -----\nAlunos:\nIsaac Silva Santos Ramos\nPedro Gonçalves Neto')
 
     bar = Menu(Menu(window), tearoff=0)
     bar.add_command(label='Open', command=abrirAqruivo)     # Open Analyzer Quit
@@ -60,7 +61,6 @@ if __name__ == '__main__':
 
     sizegrip = ttk.Sizegrip(window)
     sizegrip.pack(side="right", anchor=SE)
-    #sizegrip.grid(row=1, sticky=SE)
 
     window.config(menu=bar)
     window.mainloop()

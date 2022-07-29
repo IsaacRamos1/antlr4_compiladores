@@ -1,21 +1,8 @@
-============================
-Token           Type    
-============================
+==============================================
+Token              Type      
 
-for             PR      
-i               ID      
-in              PR      
-range           PR      
-(               SB      
-1               NUM     
-,               SB      
-10              NUM     
-)               SB      
-:               SB      
-print           PR      
-(               SB      
-"               SB      
-hello           ID      
-world           ID      
-"               SB      
-)               SB      
+pip                ID        
+==                 SB        
+20.2               NUM       
+.                  SB        
+0                  NUM       
