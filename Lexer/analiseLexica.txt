@@ -1,9 +1,0 @@
---------------------------------------
-Token           Tipo    
---------------------------------------
-print           PR      
-(               SIMBOLO 
-'               SIMBOLO 
-hello           ID      
-'               SIMBOLO 
-)               SIMBOLO 
