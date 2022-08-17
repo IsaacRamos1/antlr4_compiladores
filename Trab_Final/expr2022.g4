@@ -1,46 +1,38 @@
 //grammar expr2022;
 grammar expr2022;
 
-
 prog: listaComando;
 
-listaComando: decVars* funcao* blocoMain;
-//prog: listaComando;
 
-/*listaComando: decFuncs listaComando
-    | decFuncs
-    | funcao
-    | return
+// -------------- corpo da linguagem ------------
+listaComando: global funcao* blocoMain;
+
+funcao: 'def' ID '(' params ')' tipo '{' decVars* atribSemTipo* comandos* return* '}' //listaComando* '}'
     ;
-*/
-/*decFuncs: decVars
-    | entrada ';'
-    | saida ';'
-    | condicao
+
+blocoMain: 'def' 'main' '(' ')' '{' decVars* comandos* return*'}'
     ;
-    // | repeticao;
-*/
-funcao: 'def' ID '(' params ')' tipo '{' comandos* '}' //listaComando* '}'
-    ;
+// ---------------------------------------------
+
+global: decVars*; // variaveis globais
 
 comandos: entrada ';'
     | saida ';'
     | condicao
+    | chamadaFunc ';'
+    | repeticao
     ;
 
-decFuncs:; //entrada ';' //decVars* decFuncs*
-    //| saida ';' //decVars* decFuncs*
-    //| condicao //decVars* decFuncs*
-    //'def' ID '(' params ')' tipo '{' '}' //decVars* decFuncs* return* '}' decVars*
-    //| 'def' ID '(' ')' tipo '{' '}' //decVars* decFuncs* '}'
-    //;
-
-
+// ------------------------------------ declaração de variáveis
 decVars: declaracao ';' // int a;
     | declaracao ',' cadeiaVars ';' // int a, b, c;
-    | declaracao SB (CADEIA|exprAritmetica|exprRelacional) ';' // int a = 10;
-    | declaracao SB (CADEIA|exprAritmetica|exprRelacional) ',' listaAtrib ';' // int a = 10, b = 10;
+    | declaracao '=' (CADEIA|exprAritmetica|exprRelacional|entrada) ';' // int a = 10;
+    | declaracao '=' (CADEIA|exprAritmetica|exprRelacional) ',' listaAtrib ';' // int a = 10, b = 10;
     | declaracao ',' decVars SB cadeia ';' // int a, b, c, d;
+    ;
+// ----------------------------------------------
+
+atribSemTipo: ID '=' (CADEIA|exprAritmetica|exprRelacional|entrada) ';' // a = 10; dentro de funções e da main
     ;
 
 listaAtrib: ID SB (CADEIA|exprAritmetica|exprRelacional) ',' listaAtrib
@@ -67,14 +59,13 @@ termoAritmetico: termoAritmetico ('*'|'/') fatorAritmetico
     ;
 
 fatorAritmetico: '(' exprAritmetica ')'
-//    | INT
-//    | FLOAT
     | NUM
     | ID
     | chamadaFunc
     ;
 
-saida: 'print' '(' (ID | CADEIA) ')' // e o print("resultado: ", valor, valor ...)?
+saida: 'print' '(' (ID | CADEIA) ')'
+    | 'print' '(' CADEIA ',' cadeiaVars ')' // print("resultado: ", valor, valor ...)?
     ;
 
 tipo: 'int'
@@ -85,13 +76,14 @@ tipo: 'int'
     ;
 
 entrada: 'input' '(' ')'
+    //| ID '=' 'input' '(' ')'
     ;
 
 tipoParam: declaracao
     ;
 
 params: tipoParam ',' params
-    | tipoParam                 // estouro de memoria???
+    | tipoParam
     ;
 
 exprRelacional: exprRelacional ('||' | '&&') termoRelacional
@@ -102,26 +94,25 @@ termoRelacional: exprAritmetica (SB|'||' | '&&') exprAritmetica
     | 'True' | 'False'
     ;
 
-
-condicao: 'if' exprRelacional '{' comandos* return* '}'
-    | 'if' exprRelacional '{' comandos* return* '}' 'else' '{' comandos* return* '}'
+// ------------------------------------------------------------------ corpo da condição
+condicao: 'if' exprRelacional '{' comandos* return* break* '}'
+    | 'if' exprRelacional '{' comandos* return* break* '}' 'else' '{' comandos* return* break* '}'
    ;
-
-/*decFuncs: entrada ';' decVars* decFuncs*
-    | saida ';' decVars* decFuncs*
-    | condicao decVars* decFuncs*
-    | 'def' ID '(' params ')' tipo '{' decVars* decFuncs* return* '}' decVars*
-    | 'def' ID '(' ')' tipo '{' decVars* decFuncs* '}'
-    ;*/
-
-blocoMain: 'def' 'main' '(' ')' '{' decVars* funcao* return*'}'
-    ;
+// --------------------------------------------------------------------------------
 
 return: 'return' ';'
     | 'return' (cadeiaVars|exprRelacional|exprAritmetica) ';'
     ;
 
-chamadaFunc: ID '(' ')'
+chamadaFunc: ID '(' (params|exprAritmetica|exprRelacional|chamadaFunc) ')'
+    ;
+
+repeticao: 'for' ID 'in' 'range' '(' NUM ':' NUM ')' '{' atribSemTipo* comandos* break* '}'
+    | 'for' ID 'in' 'range' '(' NUM ':' NUM ':' NUM ')' '{' atribSemTipo* comandos* break* '}'
+    | 'do' '{' atribSemTipo* comandos* break* '}' 'while' '(' exprRelacional ')' ';'
+    ;
+
+break: 'break' ';'
     ;
 
 PR: 'for'|'in'|'range'|'None'|'if'|'else'|'elsif'
@@ -130,10 +121,8 @@ PR: 'for'|'in'|'range'|'None'|'if'|'else'|'elsif'
     |'list'|'dict'|'tuple'|'print';
 
 ID: [a-zA-Z][a-zA-Z0-9]*;
-//INT: [0-9]*;
-//FLOAT: [0-9]+[.][0-9]*;                 // COMO POE NEGATIVO?
 NUM: [-]?[0-9]*;
-CADEIA: '"' [a-zA-Z ][a-zA-Z0-9 ]* '"';
+CADEIA: '"' [a-zA-Z ][a-zA-Z0-9:?=! ]* '"';
 BOOL: 'True' | 'False';
 
 SB: '"'|'?'|'/'|'!'|'#'|'%'|'+'|'-'|'*'|'='|'=='|'<'|'>'|'('|')'|'['|']'|'{'
