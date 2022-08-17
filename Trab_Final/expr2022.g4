@@ -1,34 +1,40 @@
 //grammar expr2022;
 grammar expr2022;
 
-//prog: decVars* decFuncs* blocoMain;
-
 
 prog: listaComando;
 
-listaComando: decFuncs listaComando
+listaComando: decVars* funcao* blocoMain;
+//prog: listaComando;
+
+/*listaComando: decFuncs listaComando
     | decFuncs
     | funcao
     | return
     ;
-
-decFuncs: decVars
+*/
+/*decFuncs: decVars
     | entrada ';'
     | saida ';'
     | condicao
     ;
     // | repeticao;
-
-funcao: 'def' ID '(' params ')' tipo '{' listaComando* '}'
-    ;
-
-/*decFuncs: entrada ';' decVars* decFuncs*
-    | saida ';' decVars* decFuncs*
-    | condicao decVars* decFuncs*
-    | 'def' ID '(' params ')' tipo '{' decVars* decFuncs* return* '}' decVars*
-    | 'def' ID '(' ')' tipo '{' decVars* decFuncs* '}'
-    ;
 */
+funcao: 'def' ID '(' params ')' tipo '{' comandos* '}' //listaComando* '}'
+    ;
+
+comandos: entrada ';'
+    | saida ';'
+    | condicao
+    ;
+
+decFuncs:; //entrada ';' //decVars* decFuncs*
+    //| saida ';' //decVars* decFuncs*
+    //| condicao //decVars* decFuncs*
+    //'def' ID '(' params ')' tipo '{' '}' //decVars* decFuncs* return* '}' decVars*
+    //| 'def' ID '(' ')' tipo '{' '}' //decVars* decFuncs* '}'
+    //;
+
 
 decVars: declaracao ';' // int a;
     | declaracao ',' cadeiaVars ';' // int a, b, c;
@@ -44,8 +50,8 @@ listaAtrib: ID SB (CADEIA|exprAritmetica|exprRelacional) ',' listaAtrib
 declaracao: tipo ID
     ;
 
-cadeiaVars: (ID|CADEIA|INT|FLOAT|BOOL) ',' cadeiaVars
-    | (ID|CADEIA|INT|FLOAT|BOOL)
+cadeiaVars: (ID|CADEIA|NUM|BOOL) ',' cadeiaVars
+    | (ID|CADEIA|NUM|BOOL)
     ;
 
 cadeia: (exprAritmetica|exprRelacional|CADEIA) ',' cadeia
@@ -61,14 +67,14 @@ termoAritmetico: termoAritmetico ('*'|'/') fatorAritmetico
     ;
 
 fatorAritmetico: '(' exprAritmetica ')'
-    | INT
-    | FLOAT
+//    | INT
+//    | FLOAT
+    | NUM
     | ID
-    | chamadaFunc     // CAMADA DE FUNÇÃO PODE ESTAR NA EXPR ARITMÉTICA?
+    | chamadaFunc
     ;
 
-saida: 'print' '(' (ID | CADEIA) ')'
-    | 'print' '(' (ID | CADEIA) ',' (cadeiaVars|exprRelacional|exprAritmetica|chamadaFunc) ')'
+saida: 'print' '(' (ID | CADEIA) ')' // e o print("resultado: ", valor, valor ...)?
     ;
 
 tipo: 'int'
@@ -88,18 +94,17 @@ params: tipoParam ',' params
     | tipoParam                 // estouro de memoria???
     ;
 
-exprRelacional: exprRelacional operadorBooleano termoRelacional
+exprRelacional: exprRelacional ('||' | '&&') termoRelacional
     | termoRelacional;
 
-termoRelacional: exprAritmetica (SB|operadorBooleano) exprAritmetica
+termoRelacional: exprAritmetica (SB|'||' | '&&') exprAritmetica
     | '(' exprRelacional ')'
     | 'True' | 'False'
     ;
 
-operadorBooleano: '||' | '&&';
 
-condicao: 'if' exprRelacional '{' listaComando* return* '}'
-    |   condicao 'else' '{' listaComando* return* '}'
+condicao: 'if' exprRelacional '{' comandos* return* '}'
+    | 'if' exprRelacional '{' comandos* return* '}' 'else' '{' comandos* return* '}'
    ;
 
 /*decFuncs: entrada ';' decVars* decFuncs*
@@ -109,7 +114,7 @@ condicao: 'if' exprRelacional '{' listaComando* return* '}'
     | 'def' ID '(' ')' tipo '{' decVars* decFuncs* '}'
     ;*/
 
-blocoMain: 'def' 'main' '(' ')' '{' decVars* decFuncs* return*'}'
+blocoMain: 'def' 'main' '(' ')' '{' decVars* funcao* return*'}'
     ;
 
 return: 'return' ';'
@@ -125,10 +130,10 @@ PR: 'for'|'in'|'range'|'None'|'if'|'else'|'elsif'
     |'list'|'dict'|'tuple'|'print';
 
 ID: [a-zA-Z][a-zA-Z0-9]*;
-INT: [^-]?[0-9]*;
-FLOAT: [^-]?[0-9]+[.][0-9]*;                 // COMO POE NEGATIVO?
-CADEIA: '"' [a-zA-Z ][a-zA-Z0-9!@#:$%^&*><{}() ]* '"';
-//CAD: '"' [a-zA-Z ][a-zA-Z0-9!@#:$%^&*><{}() ]* '"';
+//INT: [0-9]*;
+//FLOAT: [0-9]+[.][0-9]*;                 // COMO POE NEGATIVO?
+NUM: [-]?[0-9]*;
+CADEIA: '"' [a-zA-Z ][a-zA-Z0-9 ]* '"';
 BOOL: 'True' | 'False';
 
 SB: '"'|'?'|'/'|'!'|'#'|'%'|'+'|'-'|'*'|'='|'=='|'<'|'>'|'('|')'|'['|']'|'{'
